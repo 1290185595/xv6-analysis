@@ -11,7 +11,7 @@ git clone %URL%/%PROJECT%
 
 if exist %LOCAL_PROJECT% rmdir /s/q %LOCAL_PROJECT%
 rename %PROJECT% %LOCAL_PROJECT%
-python modify.py %LOCAL_PROJECT%
+python modify.py
 
 cd %LOCAL_PROJECT%
 rmdir /s/q .git
