@@ -2,7 +2,7 @@ if "%1"=="xv6-riscv" (
     set URL=https://github.com/mit-pdos
     set PROJECT=xv6-riscv
 ) else (
-    set URL=git://g.csail.mit.edu
+    set URL=https://github.com/1290185595
     set PROJECT=xv6-labs-2022
 )
 set LOCAL_PROJECT=xv6-lab
