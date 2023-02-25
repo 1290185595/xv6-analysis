@@ -14,7 +14,7 @@ for f in os.listdir("lab/user"):
     print(f"xv6-lab/user/{f}")
     f = f"\t$U/_{f[:-2]}\\\n"
     if f not in UPROGS:
-        UPROGS += f
+        _UPROGS += f
 
 if _UPROGS != UPROGS:
     with open("xv6-lab/Makefile", 'w') as f:
