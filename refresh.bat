@@ -10,7 +10,7 @@ set LOCAL_PROJECT=xv6-lab
 git clone %URL%/%PROJECT%
 
 if exist %LOCAL_PROJECT% rmdir /s/q %LOCAL_PROJECT%
-rename %PROJECT% "xv6-lab"
+rename %PROJECT% %LOCAL_PROJECT%
 python modify.py %LOCAL_PROJECT%
 
 cd %LOCAL_PROJECT%
