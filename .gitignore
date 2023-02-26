@@ -2,3 +2,5 @@
 /.idea/
 /cmake-build-debug/
 /xv6-lab/
+
+/manage/ssh.ini
