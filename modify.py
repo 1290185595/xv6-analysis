@@ -26,4 +26,14 @@ if _UPROGS != UPROGS:
     with open("xv6-lab/Makefile", 'w') as f:
         f.write(makefile.replace(UPROGS, _UPROGS))
 
-ssh.upload("xv6-lab", "/root/Projects/xv6-lab")
+ssh.copy("xv6-lab", "/root/Projects/xv6-lab")
+
+
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--all", help="remove all files on sever and push all files from local", action="store_true")
+#     args = parser.parse_args()
+#     print(args)
+#
+#     if args.all:
+#     print(args.all)

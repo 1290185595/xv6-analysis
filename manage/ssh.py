@@ -44,30 +44,40 @@ class Transport:
         self.sftp = paramiko.SFTPClient.from_transport(transport)
         print('sftp传输已建立')
 
-    def check_folder(self, dst):
+    def mkdir(self, dst):
         try:
             if not stat.S_ISDIR(self.sftp.stat(dst).st_mode):
                 self.sftp.remove(dst)
                 raise
-        except Exception as e:
+        except:
+            self.mkdir(os.path.dirname(dst))
+            print(f"mkdir {dst}")
             self.sftp.mkdir(dst)
 
-    def __upload(self, src, dst):
+    def __copy(self, src, dst):
         if os.path.isfile(src):
+            print(f"copy: {src} => {dst}")
             self.sftp.put(src, dst)
         else:
-            self.check_folder(dst)
+            self.mkdir(dst)
             for f in os.listdir(src):
-                self.__upload(f"{src}/{f}", f"{dst}/{f}")
+                self.__copy(f"{src}/{f}", f"{dst}/{f}")
 
-    def upload(self, src, dst):
+    def copy(self, src, dst):
         if os.path.isfile(src):
-            self.check_folder(os.path.dirname(dst))
-        self.__upload(src, dst)
+            self.mkdir(os.path.dirname(dst))
+        self.__copy(src, dst)
 
     def __del__(self):
         self.sftp.close()
 
 
-def upload(src, dst):
-    Transport().upload(src, dst)
+def copy(src, dst):
+    Transport().copy(src, dst)
+
+
+def remove(dst):
+    pass
+
+
+__all__ = ["copy"]
