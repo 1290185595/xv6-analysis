@@ -3,6 +3,7 @@ import re
 import argparse
 import sys
 import shutil
+from manage import ssh
 
 
 class MakefileManager:
@@ -24,3 +25,5 @@ for f in os.listdir("lab/user"):
 if _UPROGS != UPROGS:
     with open("xv6-lab/Makefile", 'w') as f:
         f.write(makefile.replace(UPROGS, _UPROGS))
+
+ssh.upload("xv6-lab", "/root/Projects/xv6-lab")
