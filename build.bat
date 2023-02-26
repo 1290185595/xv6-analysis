@@ -18,5 +18,6 @@ rmdir /s/q .git
 del .gitignore
 cd ..
 
+pip install -r requirements.txt
 python modify.py
 
