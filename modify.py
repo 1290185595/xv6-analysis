@@ -16,7 +16,7 @@ class PathDict:
         self.listdir = listdir
         self.dict = {}
 
-    def push(self, v: str, d=None):
+    def push(self, v : str, d=None):
         if d is None:
             d = self.dict
         v = v.split('/', 1)
@@ -123,36 +123,60 @@ def remove_project():
     return [project_name]
 
 
-update = SshManager.update
+class Makefile:
+    path = "/".join([loc_root, project_name, "Makefile"])
+    def __init__(self):
+        with open(self.path) as f:
+            self.makefile = f.read()
+        self.UPROGS = re.search("UPROGS *=(?:.*\\\\\n)*", self.makefile).group().split("\n")
+        self._UPROGS = set(self.UPROGS[1:-1])
+
+    def add_UPROGS(self, *args):
+        for f in args:
+            self._UPROGS.add(f"\t$U/_{re.sub('.c$', '', f)}\\\n")
+
+    def remove_UPROGS(self, *args):
+        for f in args:
+            self._UPROGS.remove(f"\t$U/_{re.sub('.c$', '', f)}\\\n")
+
+    def update_UPROGS(self):
+        if self._UPROGS != set(self.UPROGS[1:-1]):
+            with open(self.path, 'w') as f:
+                f.write(self.makefile.replace(
+                    "\n".join(self.UPROGS),
+                    "\n".join([self.UPROGS[0], *self._UPROGS, self.UPROGS[-1]])
+                ))
+            change("Makefile")
+
+    def update(self):
+        self.update_UPROGS()
+
+
+Makefile = Makefile()
+
+
+def update():
+    Makefile.update()
+    SshManager.update()
+
+
+class LabCommit:
+    @staticmethod
+    def util_append(file=None):
+        if file is None:
+            for f in os.listdir("util/user"):
+                LabCommit.util_append(f)
+        else:
+            shutil.copyfile(f"util/user/{file}", f"xv6-lab/user/{file}")
+            print(f"copy: util/user/{file} => xv6-util/user/{file}")
+            change(f"user/{file}")
+            Makefile.add_UPROGS(file)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--all", help="remove all files on sever and push all files from local", action="store_true")
-    args = parser.parse_args()
-    print(args)
-
-    if args.all:
-        print(args.all)
-
-    # remove_project()
-    # create_project()
-
-    with open("xv6-lab/Makefile") as f:
-        makefile = f.read()
-
-    UPROGS = re.search("UPROGS *=(?:.*\\\\\n)*", makefile).group()
-    _UPROGS = UPROGS
-    for f in os.listdir("lab/user"):
-        shutil.copyfile(f"lab/user/{f}", f"xv6-lab/user/{f}")
-        print(f"copy: lab/user/{f} => xv6-lab/user/{f}")
-        change(f"user/{f}")
-        f = f"\t$U/_{f[:-2]}\\\n"
-        if f not in UPROGS:
-            _UPROGS += f
-
-    if _UPROGS != UPROGS:
-        with open("xv6-lab/Makefile", 'w') as f:
-            f.write(makefile.replace(UPROGS, _UPROGS))
-        change("Makefile")
-    create_project()
-    update()
+    if len(sys.argv) == 1:
+        remove_project()
+        create_project()
+    else:
+        getattr(LabCommit, sys.argv[1])()
+        update()

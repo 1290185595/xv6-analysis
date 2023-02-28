@@ -11,11 +11,10 @@ if exist %LOCAL_PROJECT% rmdir /s/q %LOCAL_PROJECT%
 rename %PROJECT% %LOCAL_PROJECT%
 
 cd %LOCAL_PROJECT%
-git checkout syscall
+git checkout %1%
 rmdir /s/q .git
 del .gitignore
 cd ..
 
 pip install -r requirements.txt
-python modify.py
-
+python modify.py %1%
