@@ -6,6 +6,7 @@ import stat
 from .singleton import singleton
 
 
+@singleton
 class BranchInfo:
     def __init__(self):
         self.config_path = os.path.join(os.path.dirname(__file__), "config.ini")
@@ -24,5 +25,3 @@ class BranchInfo:
     def get(self, option):
         return self.config.get(self.section, option)
 
-
-BranchInfo = BranchInfo()
