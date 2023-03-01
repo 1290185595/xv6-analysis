@@ -12,9 +12,10 @@ rename %PROJECT% %LOCAL_PROJECT%
 
 cd %LOCAL_PROJECT%
 git checkout %1%
+git branch -a | findstr "remotes/origin/HEAD" > .branch
 rmdir /s/q .git
 del .gitignore
 cd ..
 
 pip install -r requirements.txt
-python modify.py %1%
+python modify.py --operation=build

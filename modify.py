@@ -4,6 +4,7 @@ import argparse
 import sys
 import shutil
 from manage import ssh
+from manage.branch import BranchInfo
 
 project_name = "xv6-lab"
 loc_root = "."
@@ -16,7 +17,7 @@ class PathDict:
         self.listdir = listdir
         self.dict = {}
 
-    def push(self, v : str, d=None):
+    def push(self, v: str, d=None):
         if d is None:
             d = self.dict
         v = v.split('/', 1)
@@ -125,6 +126,7 @@ def remove_project():
 
 class Makefile:
     path = "/".join([loc_root, project_name, "Makefile"])
+
     def __init__(self):
         with open(self.path) as f:
             self.makefile = f.read()
@@ -173,10 +175,26 @@ class LabCommit:
             Makefile.add_UPROGS(file)
 
 
-if __name__ == "__main__":
-    if len(sys.argv) == 1:
+class Operation:
+    @staticmethod
+    def build(argv):
+        branch = f"{loc_root}/{project_name}/.branch"
+        with open(branch, 'r') as f:
+            BranchInfo.set("branch", f.read().split('/')[-1])
+        os.remove(branch)
         remove_project()
         create_project()
-    else:
-        getattr(LabCommit, sys.argv[1])()
-        update()
+
+    @staticmethod
+    def commit(argv):
+        remove_project()
+        create_project()
+        LabCommit.util_append
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--operation", "-o", default="commit", choices=["commit", "build"])
+    args = parser.parse_args()
+    getattr(Operation, args.operation)(args)
+    update()

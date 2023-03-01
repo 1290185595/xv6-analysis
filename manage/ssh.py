@@ -1,15 +1,15 @@
 import os
 import paramiko
 
-import configparser
+from .config import Config
 import stat
 from .singleton import singleton
 
 
 class SshInfo:
     def __init__(self):
-        self.config_path = os.path.join(os.path.dirname(__file__), "ssh.ini")
-        self.config = configparser.ConfigParser()
+        self.config_path = os.path.join(os.path.dirname(__file__), "config.ini")
+        self.config = Config()
         self.config.read(self.config_path)
 
         self.section = "ssh"
