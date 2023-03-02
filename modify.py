@@ -38,7 +38,7 @@ def remove_project():
 
 def update():
     if Makefile.update():
-        change(Makefile)
+        change("Makefile")
     SshManager.update()
 
 
@@ -60,10 +60,20 @@ class LabNone:
         pass
 
     @classmethod
-    def copy(cls, file):
-        shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
-        print(f"copy: {cls.lab_name}/{file} => {project_name}/{file}")
-        change(f"{file}")
+    def copy(cls, file=None):
+        if file is None:
+            for folder in os.listdir(cls.lab_name):
+                for file in os.listdir(f"{cls.lab_name}/{folder}"):
+                    cls.copy(f"{folder}/{file}")
+        else:
+            shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
+            print(f"copy: {cls.lab_name}/{file} => {project_name}/{file}")
+            change(f"{file}")
+
+    @classmethod
+    def add_UPROGS(cls, *files):
+        for f in files:
+            Makefile.add_UPROGS(f)
 
 
 @LabManager.add_lab("util")
@@ -71,31 +81,29 @@ class LabUtil(LabNone):
     @classmethod
     def commit(cls, file=None):
         if file is None:
+            print(f"Commit files for lab {cls.lab_name}")
             for f in os.listdir(f"{cls.lab_name}/user"):
                 cls.commit(f)
-            print(f"Commit files for lab {cls.lab_name}")
         else:
             cls.copy(f"user/{file}")
-            Makefile.add_UPROGS(file)
+            cls.add_UPROGS(file)
 
 
 @LabManager.add_lab("syscall")
 class LabSyscall(LabNone):
     @classmethod
     def commit(cls):
-        for folder in os.listdir(cls.lab_name):
-            for file in os.listdir(f"{cls.lab_name}/{folder}"):
-                cls.copy(f"{folder}/{file}")
-        for done_lab in ["trace"]:
-            Makefile.add_UPROGS(done_lab)
         print(f"Commit files for lab {cls.lab_name}")
+        cls.copy()
+        Makefile.add_UPROGS("trace", "sysinfotest")
 
 
 @LabManager.add_lab("pgtbl")
 class LabPgtbl(LabNone):
     @classmethod
     def commit(cls):
-        cls.copy("1")
+        print(f"Commit files for lab {cls.lab_name}")
+        cls.copy()
 
 
 class Operation:
