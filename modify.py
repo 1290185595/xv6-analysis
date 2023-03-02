@@ -111,7 +111,7 @@ class Operation:
     def build(cls):
         branch = f"{loc_root}/{project_name}/.branch"
         with open(branch, 'r') as f:
-            BranchInfo.set('branch', f.read().split(' ')[-1])
+            BranchInfo.set('branch', re.match(".*\\* *(.*)", f.read()).group(1))
         os.remove(branch)
         Operation.reset()
         print(f"Rebuild the project for lab {BranchInfo.get('branch')}")
