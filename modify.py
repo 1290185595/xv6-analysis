@@ -53,36 +53,54 @@ class LabManager:
         return wrapper
 
 
+@LabManager.add_lab("none")
 class LabNone:
-    @staticmethod
-    def commit():
+    @classmethod
+    def commit(cls):
         pass
+
+    @classmethod
+    def copy(cls, file):
+        shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
+        print(f"copy: {cls.lab_name}/{file} => {project_name}/{file}")
+        change(f"{file}")
 
 
 @LabManager.add_lab("util")
-class LabUtil:
+class LabUtil(LabNone):
     @classmethod
     def commit(cls, file=None):
         if file is None:
             for f in os.listdir(f"{cls.lab_name}/user"):
                 cls.commit(f)
+            print(f"Commit files for lab {cls.lab_name}")
         else:
-            shutil.copyfile(f"{cls.lab_name}/user/{file}", f"{project_name}/user/{file}")
-            print(f"copy: {cls.lab_name}/user/{file} => {project_name}/user/{file}")
-            change(f"user/{file}")
+            cls.copy(f"user/{file}")
             Makefile.add_UPROGS(file)
 
 
+@LabManager.add_lab("syscall")
+class LabSyscall(LabNone):
+    @classmethod
+    def commit(cls):
+        for folder in os.listdir(cls.lab_name):
+            for file in os.listdir(f"{cls.lab_name}/{folder}"):
+                cls.copy(f"{folder}/{file}")
+        for done_lab in ["trace"]:
+            Makefile.add_UPROGS(done_lab)
+        print(f"Commit files for lab {cls.lab_name}")
+
+
 @LabManager.add_lab("pgtbl")
-class LabPgtbl:
-    @staticmethod
-    def commit():
-        pass
+class LabPgtbl(LabNone):
+    @classmethod
+    def commit(cls):
+        cls.copy("1")
 
 
 class Operation:
-    @staticmethod
-    def build(argv):
+    @classmethod
+    def build(cls):
         branch = f"{loc_root}/{project_name}/.branch"
         with open(branch, 'r') as f:
             BranchInfo.set('branch', f.read().split(' ')[-1])
@@ -90,13 +108,13 @@ class Operation:
         Operation.reset()
         print(f"Rebuild the project for lab {BranchInfo.get('branch')}")
 
-    @staticmethod
-    def reset():
+    @classmethod
+    def reset(cls):
         remove_project()
         create_project()
 
-    @staticmethod
-    def commit(argv):
+    @classmethod
+    def commit(cls):
         getattr(LabManager, BranchInfo.get("branch"), LabNone).commit()
 
 
@@ -104,5 +122,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--operation", "-o", default="commit", choices=["commit", "build"])
     args = parser.parse_args()
-    getattr(Operation, args.operation)(args)
+    getattr(Operation, args.operation)()
     update()

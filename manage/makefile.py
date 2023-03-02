@@ -21,11 +21,11 @@ class Makefile:
 
     def add_UPROGS(self, *args):
         for f in args:
-            self._UPROGS.add(f"\t$U/_{re.sub('.c$', '', f)}\\\n")
+            self._UPROGS.add(f"\t$U/_{re.sub('.c$', '', f)}\\")
 
     def remove_UPROGS(self, *args):
         for f in args:
-            self._UPROGS.remove(f"\t$U/_{re.sub('.c$', '', f)}\\\n")
+            self._UPROGS.remove(f"\t$U/_{re.sub('.c$', '', f)}\\")
 
     def update_UPROGS(self):
         if self._UPROGS != set(self.UPROGS[1:-1]):

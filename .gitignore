@@ -1,5 +1,6 @@
 /.git/
 /.idea/
 /cmake-build-debug/
+/xv6-lab/
 
 /manage/config.ini
