@@ -4,3 +4,8 @@
 '''
 ./build.bat \[lab_name\]
 '''
+
+提交代码：  
+'''
+python modify.py
+'''
