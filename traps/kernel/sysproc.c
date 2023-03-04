@@ -87,20 +87,25 @@ sys_uptime(void) {
 
 
 uint64 sys_sigalarm(void) {
-    int ticks;
-    uint64 handler;
-    argint(0, &ticks);
-    argaddr(1, &handler);
-
     struct proc * p = myproc();
-    p->ticks = ticks;
-    p->ticks_cnt = 0;
-    p->handler = handler;
+    if (!p->tick_trapframe) {
+        int ticks;
+        uint64 handler;
+        argint(0, &ticks);
+        argaddr(1, &handler);
+
+        p->ticks = ticks;
+        p->ticks_cnt = 0;
+        p->handler = handler;
+    }
     return 0;
 }
 
 uint64 sys_sigreturn(void) {
     struct proc * p = myproc();
-    memmove(p->trapframe, &(p->tick_trapframe), sizeof(struct trapframe));
+    memmove(p->trapframe, p->tick_trapframe, sizeof(struct trapframe));
+    p->tick_trapframe = (struct trapframe *) kalloc();
+    kfree(p->tick_trapframe);
+    p->tick_trapframe=0;
     return 0;
 }

@@ -140,6 +140,7 @@ allocproc(void) {
     p->context.ra = (uint64) forkret;
     p->context.sp = p->kstack + PGSIZE;
     p->ticks = 0;
+    p->tick_trapframe=0;
     return p;
 }
 
@@ -487,9 +488,10 @@ yield(void) {
     struct proc *p = myproc();
     acquire(&p->lock);
     if (p->ticks) {
-        if (++p->ticks_cnt > p->ticks) {
+        if ((!p->tick_trapframe) && (++p->ticks_cnt > p->ticks)) {
             p->ticks_cnt = 0;
-            memmove(&(p->tick_trapframe), p->trapframe, sizeof(struct trapframe));
+            p->tick_trapframe = (struct trapframe *) kalloc();
+            memmove(p->tick_trapframe, p->trapframe, sizeof(struct trapframe));
             p->trapframe->epc = p->handler;
         }
     }
