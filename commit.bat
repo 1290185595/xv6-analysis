@@ -1,9 +1,8 @@
+python modify.py --operation=commit
+
 @echo off
-
-@REM python modify.py --operation=commit
-
 if "%1" == "" (
-    set MASSAGE="."
+    set MASSAGE=.
 ) else (
     set MASSAGE=%1
 )
