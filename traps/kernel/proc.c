@@ -489,7 +489,7 @@ yield(void) {
     if (p->ticks) {
         if (++p->ticks_cnt > p->ticks) {
             p->ticks_cnt = 0;
-            memmove(p->tick_trapframe, p->trapframe, sizeof(struct trapframe));
+            memmove(&(p->tick_trapframe), p->trapframe, sizeof(struct trapframe));
             p->trapframe->epc = p->handler;
         }
     }
