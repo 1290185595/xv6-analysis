@@ -9,6 +9,6 @@ if "%1" == "" (
 )
 @echo on
 
-git add ."
+git add .
 git commit -m %MASSAGE%
 git push
