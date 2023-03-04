@@ -38,6 +38,10 @@ class Transport:
         self.sftp = paramiko.SFTPClient.from_transport(transport)
         print('sftp传输已建立')
 
+    def __del__(self):
+        ssh_info = SshInfo()
+        print('sftp传输已关闭')
+
     def mkdir(self, dst):
         try:
             if not stat.S_ISDIR(self.sftp.stat(dst).st_mode):

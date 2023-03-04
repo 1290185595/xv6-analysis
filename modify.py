@@ -55,6 +55,8 @@ class LabManager:
 
 @LabManager.add_lab("none")
 class LabNone:
+    lab_name = None
+
     @classmethod
     def commit(cls):
         pass
@@ -106,9 +108,17 @@ class LabPgtbl(LabNone):
         cls.copy()
 
 
+@LabManager.add_lab("traps")
+class LabTraps(LabNone):
+    @classmethod
+    def commit(cls):
+        print(f"Commit files for lab {cls.lab_name}")
+        cls.copy()
+
+
 class Operation:
     @classmethod
-    def build(cls):
+    def build(cls, args):
         branch = f"{loc_root}/{project_name}/.branch"
         with open(branch, 'r') as f:
             BranchInfo.set('branch', re.match(".*\\* *(.*)", f.read()).group(1))
@@ -122,13 +132,20 @@ class Operation:
         create_project()
 
     @classmethod
-    def commit(cls):
+    def commit(cls, args):
         getattr(LabManager, BranchInfo.get("branch"), LabNone).commit()
+
+    @classmethod
+    def download(cls, args):
+        filename = getattr(args, "filename", None)
+        if filename is not None:
+            SshManager.download(f"{project_name}/{filename}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--operation", "-o", default="commit", choices=["commit", "build"])
+    parser.add_argument("--operation", "-o", default="commit", choices=["build", "commit", "download"])
+    parser.add_argument("--filename", "-f", default=None, type=str)
     args = parser.parse_args()
-    getattr(Operation, args.operation)()
+    getattr(Operation, args.operation)(args)
     update()

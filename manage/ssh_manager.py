@@ -3,6 +3,7 @@ import os
 from . import ssh
 import re
 
+
 class PathDict:
     def __init__(self, root, listdir):
         self.root = root
@@ -93,3 +94,9 @@ class SshManager:
 
         for f in self.__change.view():
             ssh.copy(f, re.sub(self.loc_root, self.ssh_root, f, 1))
+
+    def download(self, filename):
+        src = f"{self.ssh_root}/{filename}"
+        dst = f"{self.loc_root}/{filename}"
+        print(f"copy: {src} => {dst}")
+        ssh.Transport().sftp.get(src, dst)
