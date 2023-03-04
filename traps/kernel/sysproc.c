@@ -107,5 +107,5 @@ uint64 sys_sigreturn(void) {
     p->tick_trapframe = (struct trapframe *) kalloc();
     kfree(p->tick_trapframe);
     p->tick_trapframe=0;
-    return 0;
+    return p->trapframe->a0;
 }

@@ -139,6 +139,7 @@ allocproc(void) {
     memset(&p->context, 0, sizeof(p->context));
     p->context.ra = (uint64) forkret;
     p->context.sp = p->kstack + PGSIZE;
+
     p->ticks = 0;
     p->tick_trapframe=0;
     return p;
