@@ -489,6 +489,7 @@ yield(void) {
     if (p->ticks) {
         if (++p->ticks_cnt > p->ticks) {
             p->ticks_cnt = 0;
+            p->tick_epc = p->trapframe->epc;
             p->trapframe->epc = p->handler;
         }
     }
