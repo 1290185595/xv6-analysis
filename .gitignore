@@ -4,3 +4,5 @@
 /xv6-lab/
 
 /manage/config.ini
+
+**/__pycache__
