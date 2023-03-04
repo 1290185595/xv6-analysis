@@ -114,6 +114,7 @@ class LabTraps(LabNone):
     def commit(cls):
         print(f"Commit files for lab {cls.lab_name}")
         cls.copy()
+        Makefile.add_UPROGS("alarmtest")
 
 
 class Operation:
