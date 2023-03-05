@@ -454,19 +454,15 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
     flag = *pte & ~PTE_C | PTE_W;
 
     if ((mem = kalloc()) == 0)
-        goto err;
+        return -1;
     memmove(mem, (char *) pa, PGSIZE);
 
-    uvmunmap(pagetable, va, 0, 1);
+    uvmunmap(pagetable, va, 1, 1);
 
     if (mappages(pagetable, va, PGSIZE, (uint64) mem, flag) != 0) {
         kfree(mem);
-        goto err;
+        return -1;
     }
 
     return 0;
-
-    err:
-    uvmunmap(pagetable, 0, 0, 1);
-    return -1;
 }
