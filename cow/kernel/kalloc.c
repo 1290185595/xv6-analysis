@@ -38,9 +38,9 @@ int pa2idx(void * pa) {
 }
 
 void freerange(void *pa_start, void *pa_end) {
-    char *p = (char *) PGROUNDUP((uint64) pa_start);
+
     int i = 0;
-    for (; p < (char *) pa_end; p += PGSIZE) {
+    for (char *p = (char *) PGROUNDUP((uint64) pa_start); p < (char *) pa_end; p += PGSIZE) {
         kfree(p);
         ++i;
     }
