@@ -84,10 +84,15 @@ void kfree(void *pa) {
 }
 
 
-void kkeep(void * pa) {
-    if (pa) {
-        acquire(&kmem.lock);
-        ++kmem.keeper[pa2idx(pa)];
-        release(&kmem.lock);
-    }
+void kkeep_add(void * pa) {
+    acquire(&kmem.lock);
+    ++kmem.keeper[pa2idx(pa)];
+    release(&kmem.lock);
+}
+int kkeep_cnt(void * pa) {
+    int ans;
+    acquire(&kmem.lock);
+    ans = kmem.keeper[pa2idx(pa)];
+    release(&kmem.lock);
+    return ans;
 }
