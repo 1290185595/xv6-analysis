@@ -82,7 +82,7 @@ void kfree(void *pa) {
 
 
 void kkeep(void * pa) {
-    printf("%p", pa);
+    printf("%p => %d\n", pa, pa2idx(pa));
     if (pa) {
         acquire(&kmem.lock);
         ++kmem.keeper[pa2idx(pa)];
