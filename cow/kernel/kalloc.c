@@ -31,7 +31,7 @@ kinit() {
 }
 
 int pa2idx(void *pa) {
-    return ((PGROUNDUP((uint64) pa) - PGROUNDUP((uint64) end)) >> 12);
+    return ((PGROUNDUP((uint64) pa) - PGROUNDUP((uint64) end)) >> 12 >> sizeof (char *));
 }
 
 void kkeep(void * pa) {
