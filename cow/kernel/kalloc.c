@@ -41,11 +41,11 @@ void kkeep(void * pa) {
 }
 
 void freerange(void *pa_start, void *pa_end) {
+    printf("%p\n", pa_start);
     for (char *pa = (char *) PGROUNDUP((uint64) pa_start); pa < (char *) pa_end; pa += PGSIZE) {
 //        acquire(&kmem.lock);
 //        kmem.pa_cnt[pa2idx(pa)] = 0;
 //        release(&kmem.lock);
-        printf("%p\n", pa);
         kfree(pa);
     }
 }
