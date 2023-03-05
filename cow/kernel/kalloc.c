@@ -28,7 +28,6 @@ kinit() {
     kmem.pa_cnt = end;
     initlock(&kmem.lock, "kmem");
     freerange(end + pa2idx((void *) PHYSTOP), (void *) PHYSTOP);
-    printf("init");
 }
 
 int pa2idx(void *pa) {
@@ -36,16 +35,16 @@ int pa2idx(void *pa) {
 }
 
 void kkeep(void * pa) {
-    acquire(&kmem.lock);
-    ++kmem.pa_cnt[pa2idx(pa)];
-    release(&kmem.lock);
+//    acquire(&kmem.lock);
+//    ++kmem.pa_cnt[pa2idx(pa)];
+//    release(&kmem.lock);
 }
 
 void freerange(void *pa_start, void *pa_end) {
     for (char *pa = (char *) PGROUNDUP((uint64) pa_start); pa < (char *) pa_end; pa += PGSIZE) {
-        acquire(&kmem.lock);
-        kmem.pa_cnt[pa2idx(pa)] = 1;
-        release(&kmem.lock);
+//        acquire(&kmem.lock);
+//        kmem.pa_cnt[pa2idx(pa)] = 0;
+//        release(&kmem.lock);
         kfree(pa);
     }
 }
@@ -56,33 +55,31 @@ void kfree(void *pa) {
         panic("kfree");
     }
     struct run *r = (struct run *) pa;
+
     acquire(&kmem.lock);
-    if (--kmem.pa_cnt[pa2idx(pa)] == 0) {
-        r->next = kmem.freelist;
-        kmem.freelist = r;
-        release(&kmem.lock);
-        memset(pa, 1, PGSIZE);
-    } else {
-        release(&kmem.lock);
-    }
+    r->next = kmem.freelist;
+    kmem.freelist = r;
+    release(&kmem.lock);
+    memset(pa, 1, PGSIZE);
+//    if (--kmem.pa_cnt[pa2idx(pa)]) {
+//        r->next = kmem.freelist;
+//        kmem.freelist = r;
+//        release(&kmem.lock);
+//        memset(pa, 1, PGSIZE);
+//    } else {
+//        release(&kmem.lock);
+//    }
 }
 
-// Allocate one 4096-byte page of physical memory.
-// Returns a pointer that the kernel can use.
-// Returns 0 if the memory cannot be allocated.
 void *
 kalloc(void) {
     struct run *r;
 
     acquire(&kmem.lock);
     r = kmem.freelist;
-    if (r) {
-        kmem.freelist = r->next;
-    }
+    if (r) kmem.freelist = r->next;
     release(&kmem.lock);
     kkeep(r);
-    if (r) {
-        memset((char *) r, 5, PGSIZE); // fill with junk
-    }
+    if (r) memset((char *) r, 5, PGSIZE); // fill with junk
     return (void *) r;
 }
