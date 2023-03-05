@@ -42,7 +42,7 @@ void kinit() {
     acquire(&kmem.lock);
     kmem.keeper = end;
     memset(end, 1, cnt);
-    printf("%d", ((char*)kmem.keeper)[0]);
+    printf("%d", ((char*)kmem.keeper)[120]);
     release(&kmem.lock);
     freerange(end + cnt, (void *) PHYSTOP);
 }
