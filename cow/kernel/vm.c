@@ -440,7 +440,7 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
     char *mem;
     int flag;
 
-    if (va >= MAXVA)
+    if (PGROUNDDOWN(va))
         return -1;
 
     pte = walk(pagetable, va, 0);
