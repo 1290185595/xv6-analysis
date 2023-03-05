@@ -11,31 +11,46 @@
 
 void freerange(void *pa_start, void *pa_end);
 
-extern char end[]; // first address after kernel.
+extern char *end; // first address after kernel.
 // defined by kernel.ld.
 
 struct run {
     struct run *next;
-    int keeper;
 };
 
 struct {
     struct spinlock lock;
     struct run *freelist;
+    char *pa_ref_cnt;
 } kmem;
 
 void
 kinit() {
     initlock(&kmem.lock, "kmem");
+    int cnt = PGROUNDUP((char *) PHYSTOP - end) >> 12;
+    kmem.pa_ref_cnt = end;
+    end += cnt;
     freerange(end, (void *) PHYSTOP);
+}
+
+void *index2pa(int index) {
+    return (void *) (PGROUNDUP((uint64) end) + (index << 12));
+}
+
+int pa2index(void *pa) {
+    return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12);
 }
 
 void
 freerange(void *pa_start, void *pa_end) {
     char *p;
-    p = (char *) PGROUNDUP((uint64) pa_start);
-    for (; p + PGSIZE <= (char *) pa_end; p += PGSIZE)
+    int i = 0;
+    pa_start = (char *) PGROUNDUP((uint64) pa_start);
+
+    for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
+        kmem.pa_ref_cnt[pa2index(p)] = 1;
         kfree(p);
+    }
 }
 
 // Free the page of physical memory pointed at by pa,
@@ -50,12 +65,11 @@ kfree(void *pa) {
         panic("kfree");
     }
 
-    r = (struct run *) pa;
-    if (--r->keeper == 0) {
+    if (--kmem.pa_ref_cnt[pa2index(pa)] == 0) {
 
         // Fill with junk to catch dangling refs.
         memset(pa, 1, PGSIZE);
-
+        r = (struct run *) pa;
 
         acquire(&kmem.lock);
         r->next = kmem.freelist;
@@ -66,14 +80,11 @@ kfree(void *pa) {
 
 void
 kkeep(void *pa) {
-    struct run *r;
-
     if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP) {
         panic("kkeep");
     }
 
-    r = (struct run *) pa;
-    ++r->keeper;
+    ++kmem.pa_ref_cnt[pa2index(pa)];
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -91,7 +102,7 @@ kalloc(void) {
 
     if (r) {
         memset((char *) r, 5, PGSIZE); // fill with junk
-        r->keeper = 1;
+        kmem.pa_ref_cnt[pa2index(r)] = 1;
     }
     return (void *) r;
 }
