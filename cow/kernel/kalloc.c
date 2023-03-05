@@ -39,15 +39,8 @@ kinit() {
     kmem.pa_ref_cnt = end;
     end += i;
     printf("kmem.pa_ref_cnt:%p, end=%p, i = %d\n", kmem.pa_ref_cnt, end, i);
+    memset(kmem.pa_ref_cnt, 1, i);
     release(&kmem.lock);
-    while (--i >= 0) {
-        printf("%d", i);
-        acquire(&kmem.lock);
-        printf("%d", i);
-        kmem.pa_ref_cnt[i] = 1;
-        printf("%d", i);
-        release(&kmem.lock);
-    }
 
 
     freerange(end, (void *) PHYSTOP);
