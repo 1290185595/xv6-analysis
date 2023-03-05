@@ -33,7 +33,6 @@ void freerange(void *pa_start, void *pa_end) {
         kfree(p);
         ++i;
     }
-    printf("%d, %d\n", i, pa2idx((void *) PHYSTOP));
 }
 
 void kinit() {
