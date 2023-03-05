@@ -9,8 +9,6 @@
 #include "riscv.h"
 #include "defs.h"
 
-void freerange(void *pa_start, void *pa_end);
-
 extern char end[]; // first address after kernel.
 // defined by kernel.ld.
 
@@ -24,27 +22,28 @@ struct {
     void *keeper;
 } kmem;
 
-void kinit() {
-    initlock(&kmem.lock, "kmem");
-    acquire(&kmem.lock);
-    kmem.keeper = end;
-
-    release(&kmem.lock);
-    freerange(end, (void *) PHYSTOP);
+int pa2idx(void *pa) {
+    return (PGROUNDDOWN((uint64) pa) - PGROUNDDOWN((uint64) end)) >> 12;
 }
 
-int pa2idx(void * pa) {
-    return (PGROUNDDOWN((uint64)pa) - PGROUNDDOWN((uint64)end)) >> 12;
-}
 
 void freerange(void *pa_start, void *pa_end) {
-
     int i = 0;
     for (char *p = (char *) PGROUNDUP((uint64) pa_start); p < (char *) pa_end; p += PGSIZE) {
         kfree(p);
         ++i;
     }
-    printf("%d, %d\n", i, pa2idx((void *)PHYSTOP));
+    printf("%d, %d\n", i, pa2idx((void *) PHYSTOP));
+}
+
+void kinit() {
+    int cnt = pa2idx((void *) PHYSTOP);
+    initlock(&kmem.lock, "kmem");
+    acquire(&kmem.lock);
+    kmem.keeper = end;
+
+    release(&kmem.lock);
+    freerange(end + cnt, (void *) PHYSTOP);
 }
 
 
