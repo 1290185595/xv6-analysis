@@ -26,6 +26,7 @@ struct {
 
 
 int pa2index(void *pa) {
+    printf("pa2index %p\n", pa);
     return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12);
 }
 
