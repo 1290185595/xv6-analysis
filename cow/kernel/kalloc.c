@@ -35,8 +35,9 @@ kinit() {
     initlock(&kmem.lock, "kmem");
     kmem.pa_ref_cnt = end;
     end += pa2index((void *)PHYSTOP);
+
+    printf("kmem.pa_ref_cnt=%p, end=%p\n", kmem.pa_ref_cnt, end);
     freerange(end, (void *) PHYSTOP);
-    printf("1\n");
 }
 
 
