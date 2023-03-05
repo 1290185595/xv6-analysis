@@ -154,7 +154,9 @@ kinit() {
     initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
 }
-
+int pa2idx(void * pa) {
+    return ((PGROUNDUP((uint64) pa) - PGROUNDUP((uint64) end)) >> 12);
+}
 void kkeep(void *) {
 
 }
@@ -173,13 +175,12 @@ freerange(void *pa_start, void *pa_end) {
 // initializing the allocator; see kinit above.)
 void
 _kfree(void *pa) {
-    struct run *r;
-
-    r = (struct run *) pa;
+    struct run *r = (struct run *) pa;
 
     acquire(&kmem.lock);
     r->next = kmem.freelist;
     kmem.freelist = r;
+//    kmem.pa_cnt[]
     release(&kmem.lock);
 }
 void
