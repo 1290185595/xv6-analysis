@@ -334,7 +334,9 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
 
     while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
-        if (is_cow_fault(pagetable, va0) && cow_alloc(pagetable, va0)) return -1;
+        if (is_cow_fault(pagetable, va0)){
+            if (cow_alloc(pagetable, va0))return -1;
+        }
         pa0 = walkaddr(pagetable, va0);
         if (pa0 == 0)
             return -1;
