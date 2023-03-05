@@ -451,7 +451,7 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
     if ((*pte & PTE_U) == 0)
         return -1;
     pa = PTE2PA(*pte);
-    flag = (*pte & ~PTE_C) | PTE_W;
+    flag = PTE_FLAGS((*pte & ~PTE_C) | PTE_W);
 
     if ((mem = kalloc()) == 0)
         return -1;
