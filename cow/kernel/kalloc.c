@@ -32,11 +32,16 @@ int pa2index(void *pa) {
 
 void
 kinit() {
-    initlock(&kmem.lock, "kmem");
-    kmem.pa_ref_cnt = end;
-    end += pa2index((void *)PHYSTOP);
 
-    printf("kmem.pa_ref_cnt=%p(%x), end=%p\n", kmem.pa_ref_cnt, *kmem.pa_ref_cnt, end);
+    int i = pa2index((void *)PHYSTOP);
+    kmem.pa_ref_cnt = end;
+    end += i;
+
+    while (--i >= 0) {
+        kmem.pa_ref_cnt[i] = 1;
+    }
+
+    initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
 }
 
@@ -47,9 +52,6 @@ freerange(void *pa_start, void *pa_end) {
     pa_start = (char *) PGROUNDUP((uint64) pa_start);
 
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
-        printf("%p, kmem.pa_ref_cnt[pa2index(p)]=%d\n", p, kmem.pa_ref_cnt[pa2index(p)]);
-        * (kmem.pa_ref_cnt + pa2index(p)) = 1;
-        printf("%p\n", p);
         kfree(p);
     }
     printf("1\n");
@@ -88,7 +90,9 @@ kkeep(void *pa) {
         panic("kkeep");
     }
 
+    acquire(&kmem.lock);
     ++kmem.pa_ref_cnt[pa2index(pa)];
+    release(&kmem.lock);
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -100,13 +104,14 @@ kalloc(void) {
 
     acquire(&kmem.lock);
     r = kmem.freelist;
-    if (r)
+    if (r){
         kmem.freelist = r->next;
+        kmem.pa_ref_cnt[pa2index(r)] = 1;
+    }
     release(&kmem.lock);
 
     if (r) {
         memset((char *) r, 5, PGSIZE); // fill with junk
-        kmem.pa_ref_cnt[pa2index(r)] = 1;
     }
     return (void *) r;
 }
