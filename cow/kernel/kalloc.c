@@ -24,27 +24,23 @@ struct {
     char *pa_ref_cnt;
 } kmem;
 
-void
-kinit() {
-    initlock(&kmem.lock, "kmem");
-    int cnt = PGROUNDUP((char *) PHYSTOP - end) >> 12;
-    kmem.pa_ref_cnt = end;
-    end += cnt;
-    freerange(end, (void *) PHYSTOP);
-}
-
-void *index2pa(int index) {
-    return (void *) (PGROUNDUP((uint64) end) + (index << 12));
-}
 
 int pa2index(void *pa) {
     return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12);
 }
 
 void
+kinit() {
+    initlock(&kmem.lock, "kmem");
+    kmem.pa_ref_cnt = end;
+    end += pa2index((void *)PHYSTOP);
+    freerange(end, (void *) PHYSTOP);
+}
+
+
+void
 freerange(void *pa_start, void *pa_end) {
     char *p;
-    int i = 0;
     pa_start = (char *) PGROUNDUP((uint64) pa_start);
 
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
