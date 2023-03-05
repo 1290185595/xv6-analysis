@@ -434,6 +434,7 @@ int is_cow_fault(pagetable_t pagetable, uint64 va) {
     return 1;
 }
 
+
 int cow_alloc(pagetable_t pagetable, uint64 va) {
     pte_t *pte;
     uint64 pa;
@@ -442,7 +443,7 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
 
     if (va >= MAXVA)
         return -1;
-    va = PGROUNDDOWN(va);
+//    va = PGROUNDDOWN(va);
 
     pte = walk(pagetable, va, 0);
     if (pte == 0)
