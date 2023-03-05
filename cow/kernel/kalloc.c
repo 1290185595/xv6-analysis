@@ -19,7 +19,7 @@ struct run {
 struct {
     struct spinlock lock;
     struct run *freelist;
-    void *keeper;
+    char *keeper;
 } kmem;
 
 int pa2idx(void *pa) {
@@ -42,7 +42,6 @@ void kinit() {
     acquire(&kmem.lock);
     kmem.keeper = end;
     memset(end, 1, cnt);
-    printf("%d", ((char*)kmem.keeper)[120]);
     release(&kmem.lock);
     freerange(end + cnt, (void *) PHYSTOP);
 }
@@ -53,8 +52,9 @@ void *kalloc(void) {
 
     acquire(&kmem.lock);
     r = kmem.freelist;
-    if (r)
+    if (r) {
         kmem.freelist = r->next;
+    }
     release(&kmem.lock);
 
     if (r)
@@ -63,20 +63,22 @@ void *kalloc(void) {
 }
 
 void kfree(void *pa) {
-    struct run *r;
+    struct run *r = 0;
+    if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP) panic("kfree");
 
-    if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP)
-        panic("kfree");
-
-    // Fill with junk to catch dangling refs.
-    memset(pa, 1, PGSIZE);
-
-    r = (struct run *) pa;
 
     acquire(&kmem.lock);
-    r->next = kmem.freelist;
-    kmem.freelist = r;
+    if (!--kmem.keeper[pa2idx(pa)]) r = (struct run *) pa;
     release(&kmem.lock);
+    if (r) {
+        memset(pa, 1, PGSIZE);
+
+
+        acquire(&kmem.lock);
+        r->next = kmem.freelist;
+        kmem.freelist = r;
+        release(&kmem.lock);
+    }
 }
 
 
