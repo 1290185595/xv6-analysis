@@ -117,6 +117,14 @@ class LabTraps(LabNone):
         Makefile.add_UPROGS("alarmtest")
 
 
+@LabManager.add_lab("cow")
+class LabCow(LabNone):
+    @classmethod
+    def commit(cls):
+        print(f"Commit files for lab {cls.lab_name}")
+        cls.copy()
+
+
 class Operation:
     @classmethod
     def build(cls, args):
