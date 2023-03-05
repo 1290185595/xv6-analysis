@@ -56,7 +56,7 @@ void *kalloc(void) {
         kmem.freelist = r->next;
     }
     release(&kmem.lock);
-
+    kkeep(r);
     if (r)
         memset((char *) r, 5, PGSIZE); // fill with junk
     return (void *) r;
@@ -82,6 +82,10 @@ void kfree(void *pa) {
 }
 
 
-void kkeep(void *) {
-
+void kkeep(void * pa) {
+    if (pa) {
+        acquire(&kmem.lock);
+        ++kmem.keeper[pa2idx(pa)];
+        release(&kmem.lock);
+    }
 }
