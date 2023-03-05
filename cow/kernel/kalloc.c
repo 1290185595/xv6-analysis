@@ -34,12 +34,14 @@ void
 kinit() {
     initlock(&kmem.lock, "kmem");
 
-    acquire(&kmem.lock);
     int i = pa2index((void *) PHYSTOP);
     kmem.pa_ref_cnt = end;
     end += i;
-    while (--i >= 0) kmem.pa_ref_cnt[i] = 1;
-    release(&kmem.lock);
+    while (--i >= 0) {
+        acquire(&kmem.lock);
+        kmem.pa_ref_cnt[i] = 1;
+        release(&kmem.lock);
+    }
 
 
     freerange(end, (void *) PHYSTOP);
@@ -54,7 +56,6 @@ freerange(void *pa_start, void *pa_end) {
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
         kfree(p);
     }
-    printf("1\n");
 }
 
 // Free the page of physical memory pointed at by pa,
@@ -65,12 +66,9 @@ void
 kfree(void *pa) {
     struct run *r;
 
-    printf("kfree %p\n", pa);
     if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP) {
         panic("kfree");
     }
-
-    printf("kfree %p\n", pa);
     if (--kmem.pa_ref_cnt[pa2index(pa)] == 0) {
 
         // Fill with junk to catch dangling refs.
