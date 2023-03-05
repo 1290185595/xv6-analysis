@@ -32,9 +32,11 @@ int pa2index(void *pa) {
 void
 kinit() {
     initlock(&kmem.lock, "kmem");
+    printf("1\n");
     kmem.pa_ref_cnt = end;
     end += pa2index((void *)PHYSTOP);
     freerange(end, (void *) PHYSTOP);
+    printf("1\n");
 }
 
 
