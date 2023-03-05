@@ -45,6 +45,7 @@ void freerange(void *pa_start, void *pa_end) {
 //        acquire(&kmem.lock);
 //        kmem.pa_cnt[pa2idx(pa)] = 0;
 //        release(&kmem.lock);
+        printf("%p\n", pa);
         kfree(pa);
     }
 }
