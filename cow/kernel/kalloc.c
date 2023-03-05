@@ -44,11 +44,13 @@ void
 freerange(void *pa_start, void *pa_end) {
     char *p;
     pa_start = (char *) PGROUNDUP((uint64) pa_start);
+    printf("1\n");
 
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
         kmem.pa_ref_cnt[pa2index(p)] = 1;
         kfree(p);
     }
+    printf("1\n");
 }
 
 // Free the page of physical memory pointed at by pa,
