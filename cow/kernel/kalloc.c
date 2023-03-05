@@ -136,6 +136,8 @@
 
 void freerange(void *pa_start, void *pa_end);
 
+int pa2idx(void *pa);
+
 extern char end[]; // first address after kernel.
 // defined by kernel.ld.
 
@@ -146,17 +148,22 @@ struct run {
 struct {
     struct spinlock lock;
     struct run *freelist;
-    char * pa_cnt;
+    char *pa_cnt;
 } kmem;
 
 void
 kinit() {
+    kmem.pa_cnt = end;
+    end;
+
     initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
 }
-int pa2idx(void * pa) {
+
+int pa2idx(void *pa) {
     return ((PGROUNDUP((uint64) pa) - PGROUNDUP((uint64) end)) >> 12);
 }
+
 void kkeep(void *) {
 
 }
@@ -183,6 +190,7 @@ _kfree(void *pa) {
 //    kmem.pa_cnt[]
     release(&kmem.lock);
 }
+
 void
 kfree(void *pa) {
     if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP)
