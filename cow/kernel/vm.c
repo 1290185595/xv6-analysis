@@ -290,33 +290,25 @@ uvmfree(pagetable_t pagetable, uint64 sz) {
 // returns 0 on success, -1 on failure.
 // frees any allocated pages on failure.
 int
-uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
-{
+uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
     pte_t *pte;
     uint64 pa, i;
     uint flags;
 
-    for(i = 0; i < sz; i += PGSIZE){
-        if((pte = walk(old, i, 0)) == 0)
+    for (i = 0; i < sz; i += PGSIZE) {
+        if ((pte = walk(old, i, 0)) == 0)
             panic("uvmcopy: pte should exist");
-        if((*pte & PTE_V) == 0)
+        if ((*pte & PTE_V) == 0)
             panic("uvmcopy: page not present");
-        // 设置父进程的PTE_W为不可写，且为COW页
-        *pte = ((*pte) & (~PTE_W)) | PTE_COW;
+        *pte = (*pte & ~PTE_W) | PTE_C;
         flags = PTE_FLAGS(*pte);
         pa = PTE2PA(*pte);
-        // 不为子进程分配内存，指向pa，页表属性设置为flags即可
-        if(mappages(new, i, PGSIZE, pa, flags) != 0) {
-            goto err;
-        }
-        kaddref((void*)pa);
+        if (mappages(new, i, PGSIZE, (uint64) pa, flags)) goto err;
+        kkeep_add((void *) pa);
     }
     return 0;
 
     err:
-    // 当发生错误时，是否需要恢复错误之前对父进程
-    // 页表的修改？如果不恢复，后面的程序是否能够纠正？
-    // 在设计后面的程序时需要考虑到这一点
     uvmunmap(new, 0, i / PGSIZE, 1);
     return -1;
 }
@@ -337,49 +329,21 @@ uvmclear(pagetable_t pagetable, uint64 va) {
 // Copy len bytes from src to virtual address dstva in a given page table.
 // Return 0 on success, -1 on error.
 int
-copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
-{
+copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
     uint64 n, va0, pa0;
-    pte_t* pte;    // add
 
-    while(len > 0){
+    while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
-        if(va0 >= MAXVA)
-            return -1;
-        if((pte = walk(pagetable, va0, 0)) == 0)
-            return -1;
-        if (((*pte & PTE_V) == 0) || ((*pte & PTE_U)) == 0)
-            return -1;
-        pa0 = PTE2PA(*pte);
-        if(((*pte & PTE_W) == 0) && (*pte & PTE_COW)) {
-            acquire_refcnt();
-            if(kgetref((void*)pa0) == 1) {
-                *pte = (*pte | PTE_W) & (~PTE_COW);
-            } else {
-                char* mem = kalloc();
-                if(mem == 0) {
-                    printf("copyout(): memery alloc fault\n");
-                    release_refcnt();
-                    return -1;
-                }
-                memmove(mem, (void*)pa0, PGSIZE);
-                uint newflags = (PTE_FLAGS(*pte) & (~PTE_COW)) | PTE_W;
-                if(mappages(pagetable, va0, PGSIZE, (uint64)mem, newflags) != 0) {
-                    kfree(mem);
-                    release_refcnt();
-                    return -1;
-                }
-                kfree((void*)pa0);
-            }
-            release_refcnt();
+        if (is_cow_fault(pagetable, va0)) {
+            if (cow_alloc(pagetable, va0)) return -1;
         }
         pa0 = walkaddr(pagetable, va0);
-        if(pa0 == 0)
+        if (pa0 == 0)
             return -1;
         n = PGSIZE - (dstva - va0);
-        if(n > len)
+        if (n > len)
             n = len;
-        memmove((void *)(pa0 + (dstva - va0)), src, n);
+        memmove((void *) (pa0 + (dstva - va0)), src, n);
 
         len -= n;
         src += n;
@@ -454,3 +418,47 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
     }
 }
 
+int is_cow_fault(pagetable_t pagetable, uint64 va) {
+    pte_t *pte;
+
+    if (va >= MAXVA) return 0;
+
+    pte = walk(pagetable, va, 0);
+    if (pte == 0) return 0;
+    if ((*pte & PTE_V) == 0) return 0;
+    if ((*pte & PTE_U) == 0) return 0;
+    if ((*pte & PTE_C) == 0) return 0;
+
+    return 1;
+}
+
+
+int cow_alloc(pagetable_t pagetable, uint64 va) {
+    pte_t *pte;
+    uint64 pa;
+    char *mem;
+    int flag;
+    va = PGROUNDDOWN(va);
+
+    pte = walk(pagetable, va, 0);
+    pa = PTE2PA(*pte);
+    if (kkeep_cnt((void*)pa) == 1) {
+        *pte = (*pte & ~PTE_C) | PTE_W;
+        return 0;
+    }
+
+    flag = PTE_FLAGS((*pte & ~PTE_C) | PTE_W);
+
+    if ((mem = kalloc()) == 0) return -1;
+    memmove(mem, (void *) pa, PGSIZE);
+
+//    uvmunmap(pagetable, va, 1, 1);
+
+    if (mappages(pagetable, va, PGSIZE, (uint64) mem, flag) != 0) {
+        kfree(mem);
+        return -1;
+    }
+    kfree((void *)pa);
+
+    return 0;
+}
