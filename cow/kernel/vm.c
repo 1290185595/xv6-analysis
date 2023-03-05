@@ -149,6 +149,8 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm) {
         if (*pte & PTE_V)
             panic("mappages: remap");
         *pte = PA2PTE(pa) | perm | PTE_V;
+
+        kkeep((char *) pa);
         if (a == last)
             break;
         a += PGSIZE;
@@ -305,7 +307,6 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
         if (mappages(new, i, PGSIZE, (uint64) pa, flags) != 0) {
             goto err;
         }
-        kkeep((char *)pa);
     }
     return 0;
 
