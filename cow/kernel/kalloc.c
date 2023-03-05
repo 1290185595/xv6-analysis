@@ -36,7 +36,7 @@ kinit() {
     kmem.pa_ref_cnt = end;
     end += pa2index((void *)PHYSTOP);
 
-    printf("kmem.pa_ref_cnt=%p, end=%p\n", kmem.pa_ref_cnt, end);
+    printf("kmem.pa_ref_cnt=%p(%x), end=%p\n", kmem.pa_ref_cnt, *kmem.pa_ref_cnt, end);
     freerange(end, (void *) PHYSTOP);
 }
 
