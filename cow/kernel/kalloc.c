@@ -30,6 +30,9 @@ int pa2idx(void *pa) {
 void freerange(void *pa_start, void *pa_end) {
     int i = 0;
     for (char *p = (char *) PGROUNDUP((uint64) pa_start); p < (char *) pa_end; p += PGSIZE) {
+        acquire(&kmem.lock);
+        kmem.keeper[pa2idx(p)] = 1;
+        release(&kmem.lock);
         kfree(p);
         ++i;
     }
@@ -40,7 +43,7 @@ void kinit() {
     initlock(&kmem.lock, "kmem");
     acquire(&kmem.lock);
     kmem.keeper = end;
-    memset(end, 1, cnt);
+//    memset(end, 1, cnt);
     release(&kmem.lock);
     freerange(end + cnt, (void *) PHYSTOP);
 }
