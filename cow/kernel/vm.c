@@ -300,7 +300,7 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
         if ((*pte & PTE_V) == 0)
             panic("uvmcopy: page not present");
         pa = PTE2PA(*pte);
-        *pte = *pte & ~PTE_W | PTE_C;
+        *pte = (*pte & ~PTE_C) | PTE_W;
         flags = PTE_FLAGS(*pte);
         if (mappages(new, i, PGSIZE, (uint64) pa, flags) != 0) {
             goto err;
@@ -451,7 +451,7 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
     if ((*pte & PTE_U) == 0)
         return -1;
     pa = PTE2PA(*pte);
-    flag = *pte & ~PTE_C | PTE_W;
+    flag = (*pte & ~PTE_C) | PTE_W;
 
     if ((mem = kalloc()) == 0)
         return -1;
