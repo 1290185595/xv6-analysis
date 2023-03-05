@@ -438,7 +438,7 @@ int cow_alloc(pagetable_t pagetable, uint64 va) {
     pte_t *pte;
     uint64 pa;
     char *mem;
-    int flag
+    int flag;
 
     if (va >= MAXVA)
         return -1;
