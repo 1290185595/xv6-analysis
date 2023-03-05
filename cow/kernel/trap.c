@@ -62,8 +62,11 @@ usertrap(void) {
         intr_on();
 
         syscall();
-    } else if ((r_scause() == 15) && is_cow_fault(p->pagetable, r_stval())) {
-        if(cow_alloc(p->pagetable, r_stval())) {
+    } else if ((r_scause() == 15)) {
+        uint64 va = PGROUNDDOWN(r_stval());
+        if (va > p->sz || !is_cow_fault(p->pagetable, va)) {
+            setkilled(p);
+        } else if (cow_alloc(p->pagetable, va)) {
             setkilled(p);
         }
     } else if ((which_dev = devintr()) != 0) {
