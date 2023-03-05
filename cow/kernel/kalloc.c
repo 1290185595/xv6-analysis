@@ -154,7 +154,6 @@ struct {
 void
 kinit() {
     kmem.pa_cnt = end;
-    end;
 
     initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
