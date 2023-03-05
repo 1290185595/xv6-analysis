@@ -64,6 +64,7 @@ kfree(void *pa) {
         panic("kfree");
     }
 
+    printf("kfree %p\n", pa);
     if (--kmem.pa_ref_cnt[pa2index(pa)] == 0) {
 
         // Fill with junk to catch dangling refs.
