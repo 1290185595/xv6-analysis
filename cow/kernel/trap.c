@@ -62,8 +62,10 @@ usertrap(void) {
         intr_on();
 
         syscall();
-    } else if (((r_scause() == 15) || (r_scause() == 13)) && is_cow_fault(p->pagetable, r_stval())) {
-        cow_alloc(p->pagetable, r_stval());
+    } else if ((r_scause() == 15) && is_cow_fault(p->pagetable, r_stval())) {
+        if(cow_alloc(p->pagetable, r_stval())) {
+            setkilled(p);
+        }
     } else if ((which_dev = devintr()) != 0) {
         // ok
     } else {
