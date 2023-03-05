@@ -303,10 +303,8 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
         pa = PTE2PA(*pte);
         *pte = (*pte & ~PTE_W) | PTE_C;
         flags = PTE_FLAGS(*pte);
-        if (mappages(new, i, PGSIZE, (uint64) pa, flags) != 0) {
-            kkeep((char *) pa);
-            goto err;
-        }
+        if (mappages(new, i, PGSIZE, (uint64) pa, flags)) goto err;
+        kkeep((char *) pa);
     }
     return 0;
 
