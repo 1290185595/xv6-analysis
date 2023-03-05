@@ -26,8 +26,8 @@ struct {
 
 
 int pa2index(void *pa) {
-    printf("pa2index %p => %d\n", pa, (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof(char *)));
-    return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof(char *));
+    printf("pa2index %p => %d\n", pa, (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12));
+    return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12);
 }
 
 void
