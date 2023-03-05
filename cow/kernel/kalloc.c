@@ -26,22 +26,22 @@ struct {
 
 
 int pa2index(void *pa) {
-    printf("pa2index %p => %d\n", pa, (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof (char*)));
-    return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof (char*));
+    printf("pa2index %p => %d\n", pa, (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof(char *)));
+    return (int) (((uint64) pa - PGROUNDUP((uint64) end)) >> 12 >> sizeof(char *));
 }
 
 void
 kinit() {
+    initlock(&kmem.lock, "kmem");
 
-    int i = pa2index((void *)PHYSTOP);
+    acquire(&kmem.lock);
+    int i = pa2index((void *) PHYSTOP);
     kmem.pa_ref_cnt = end;
     end += i;
+    while (--i >= 0) kmem.pa_ref_cnt[i] = 1;
+    release(&kmem.lock);
 
-    while (--i >= 0) {
-        kmem.pa_ref_cnt[i] = 1;
-    }
 
-    initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
 }
 
@@ -104,7 +104,7 @@ kalloc(void) {
 
     acquire(&kmem.lock);
     r = kmem.freelist;
-    if (r){
+    if (r) {
         kmem.freelist = r->next;
         kmem.pa_ref_cnt[pa2index(r)] = 1;
     }
