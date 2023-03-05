@@ -46,7 +46,7 @@ freerange(void *pa_start, void *pa_end) {
     pa_start = (char *) PGROUNDUP((uint64) pa_start);
 
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
-        printf("%p, kmem.pa_ref_cnt[pa2index(p)]=%d\n", p, * (kmem.pa_ref_cnt + pa2index(p)));
+        printf("%p, kmem.pa_ref_cnt[pa2index(p)]=%d\n", p, kmem.pa_ref_cnt[pa2index(p)]);
         * (kmem.pa_ref_cnt + pa2index(p)) = 1;
         printf("%p\n", p);
         kfree(p);
