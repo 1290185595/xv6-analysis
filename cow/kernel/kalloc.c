@@ -32,7 +32,6 @@ int pa2index(void *pa) {
 void
 kinit() {
     initlock(&kmem.lock, "kmem");
-    printf("1\n");
     kmem.pa_ref_cnt = end;
     end += pa2index((void *)PHYSTOP);
     freerange(end, (void *) PHYSTOP);
@@ -44,9 +43,9 @@ void
 freerange(void *pa_start, void *pa_end) {
     char *p;
     pa_start = (char *) PGROUNDUP((uint64) pa_start);
-    printf("1\n");
 
     for (p = pa_start; p + PGSIZE <= (char *) pa_end; p += PGSIZE) {
+        printf("%p\n", p);
         kmem.pa_ref_cnt[pa2index(p)] = 1;
         kfree(p);
     }
