@@ -59,7 +59,7 @@ class LabNone:
 
     @classmethod
     def commit(cls):
-        pass
+        print(cls.lab_name)
 
     @classmethod
     def copy(cls, file=None):
@@ -121,6 +121,15 @@ class LabTraps(LabNone):
 class LabCow(LabNone):
     @classmethod
     def commit(cls):
+        print(f"Commit files for lab {cls.lab_name}")
+        cls.copy()
+
+
+@LabManager.add_lab("thread")
+class LabThread(LabNone):
+    @classmethod
+    def commit(cls):
+        super().commit()
         print(f"Commit files for lab {cls.lab_name}")
         cls.copy()
 
