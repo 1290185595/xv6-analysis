@@ -164,6 +164,8 @@ freeproc(struct proc *p) {
     p->killed = 0;
     p->xstate = 0;
     p->state = UNUSED;
+
+    kfree(p->tick_trapframe);
 }
 
 // Create a user page table for a given process, with no user memory,
