@@ -300,7 +300,8 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
         if ((*pte & PTE_V) == 0)
             panic("uvmcopy: page not present");
 
-        if (*pte & PTE_W) *pte = (*pte & ~PTE_W) | PTE_C;
+//        if (*pte & PTE_W)
+            *pte = (*pte & ~PTE_W) | PTE_C;
         pa = PTE2PA(*pte);
         flags = PTE_FLAGS(*pte);
         if (mappages(new, i, PGSIZE, (uint64) pa, flags) != 0) {
@@ -456,7 +457,8 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
     if (pte == 0) return -1;
     if ((*pte & PTE_V) == 0) return -1;
     if ((*pte & PTE_U) == 0) return -1;
-    if ((*pte & (PTE_W | PTE_C)) == 0) return -1;
+    if ((*pte & PTE_W) != 0) return 0;
+    if ((*pte & PTE_C) == 0) return -1;
 
     uint64 pa = PTE2PA(*pte);
     if (kref_cnt((void *) pa) == 1) {
