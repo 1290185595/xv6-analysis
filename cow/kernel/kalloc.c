@@ -9,7 +9,6 @@
 #include "riscv.h"
 #include "defs.h"
 
-void freerange(void *pa_start, void *pa_end);
 
 extern char end[]; // first address after kernel.
 // defined by kernel.ld.
@@ -24,8 +23,35 @@ struct {
     char *ref;
 } kmem;
 
-int p2i(void *p) {
+inline int p2i(void *p) {
     return (PGROUNDUP((uint64) p) - PGROUNDUP((uint64) end)) / PGSIZE;
+}
+
+void
+freerange(void *pa_start, void *pa_end) {
+    char *p;
+    p = (char *) PGROUNDUP((uint64) pa_start);
+    for (; p + PGSIZE <= (char *) pa_end; p += PGSIZE)
+        kfree(p);
+}
+
+inline int kref_change(void *pa, int i) {
+    acquire(&kmem.lock);
+    i = kmem.ref[p2i(pa)] += i;
+    release(&kmem.lock);
+    return i;
+}
+
+int kref_cnt(void *pa) {
+    return kref_change(pa, 0);
+}
+
+void kref_add(void *pa) {
+    kref_change(pa, 1);
+}
+
+int kref_sub(void *pa) {
+    return kref_change(pa, -1);
 }
 
 void
@@ -40,13 +66,6 @@ kinit() {
     freerange(end + cnt, (void *) PHYSTOP);
 }
 
-void
-freerange(void *pa_start, void *pa_end) {
-    char *p;
-    p = (char *) PGROUNDUP((uint64) pa_start);
-    for (; p + PGSIZE <= (char *) pa_end; p += PGSIZE)
-        kfree(p);
-}
 
 // Free the page of physical memory pointed at by pa,
 // which normally should have been returned by a
@@ -89,23 +108,4 @@ kalloc(void) {
     if (r)
         memset((char *) r, 5, PGSIZE); // fill with junk
     return (void *) r;
-}
-
-inline int kref_change(void *pa, int i) {
-    acquire(&kmem.lock);
-    i = kmem.ref[p2i(pa)] += i;
-    release(&kmem.lock);
-    return i;
-}
-
-int kref_cnt(void *pa) {
-    return kref_change(pa, 0);
-}
-
-void kref_add(void *pa) {
-    kref_change(pa, 1);
-}
-
-int kref_sub(void *pa) {
-    return kref_change(pa, -1);
 }
