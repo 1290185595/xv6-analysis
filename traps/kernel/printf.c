@@ -135,5 +135,5 @@ printfinit(void)
 }
 
 void backtrace() {
-    printf("%p\n", r_fp());
+    printf("%p\n", 1);
 }
