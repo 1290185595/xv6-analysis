@@ -97,34 +97,26 @@ class LabUtil(LabNone):
 class LabSyscall(LabNone):
     @classmethod
     def commit(cls):
-        print(f"Commit files for lab {cls.lab_name}")
-        cls.copy()
+        super().commit()
         Makefile.add_UPROGS("trace", "sysinfotest")
 
 
 @LabManager.add_lab("pgtbl")
 class LabPgtbl(LabNone):
-    @classmethod
-    def commit(cls):
-        print(f"Commit files for lab {cls.lab_name}")
-        cls.copy()
+    pass
 
 
 @LabManager.add_lab("traps")
 class LabTraps(LabNone):
     @classmethod
     def commit(cls):
-        print(f"Commit files for lab {cls.lab_name}")
-        cls.copy()
+        super().commit()
         Makefile.add_UPROGS("alarmtest")
 
 
 @LabManager.add_lab("cow")
 class LabCow(LabNone):
-    @classmethod
-    def commit(cls):
-        print(f"Commit files for lab {cls.lab_name}")
-        cls.copy()
+    pass
 
 
 @LabManager.add_lab("thread")
