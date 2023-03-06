@@ -451,6 +451,8 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
 
 
 int handle_with_cow(pagetable_t pagetable, uint64 va) {
+    if (va >= MAXVA) return -1;
+
     pte_t *pte = walk(pagetable, va, 0);
     if (pte == 0) return -1;
     if ((*pte & PTE_V) == 0) return -1;
