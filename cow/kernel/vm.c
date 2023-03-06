@@ -456,6 +456,7 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
     if ((*pte & PTE_U) == 0) return -1;
     if ((*pte & PTE_C) == 0) return -1;
 
+    uint64 pa = PTE2PA(*pte);
     if (kref_cnt((void *)pa) == 1) {
         *pte = (*pte & ~PTE_C) | PTE_W;
         return 0;
@@ -463,8 +464,6 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
 
     char *mem = kalloc();
     if (!mem) return -1;
-
-    uint64 pa = PTE2PA(*pte);
     memmove(mem, (void *) pa, PGSIZE);
 
     uint flags = PTE_FLAGS((*pte & ~PTE_C) | PTE_W);
