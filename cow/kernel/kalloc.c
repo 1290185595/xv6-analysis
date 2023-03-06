@@ -37,7 +37,6 @@ freerange(void *pa_start, void *pa_end) {
 
 inline int kref_change(void *pa, int i) {
     acquire(&kmem.lock);
-    if (p2i(pa) < 0) panic("pa < 0\n");
     i = kmem.ref[p2i(pa)] += i;
     release(&kmem.lock);
     return i;
