@@ -365,6 +365,8 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
 
     while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
+        if (handle_with_cow(pagetable, va0))
+            return -1;
         pa0 = walkaddr(pagetable, va0);
         if (pa0 == 0)
             return -1;
@@ -454,10 +456,10 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
     if (pte == 0) return -1;
     if ((*pte & PTE_V) == 0) return -1;
     if ((*pte & PTE_U) == 0) return -1;
-    if ((*pte & PTE_C) == 0) return -1;
+    if ((*pte & (PTE_W | PTE_C)) == 0) return -1;
 
     uint64 pa = PTE2PA(*pte);
-    if (kref_cnt((void *)pa) == 1) {
+    if (kref_cnt((void *) pa) == 1) {
         *pte = (*pte & ~PTE_C) | PTE_W;
         return 0;
     }
@@ -471,7 +473,7 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
         kfree(mem);
         return -1;
     }
-    kfree((void *)pa);
+    kfree((void *) pa);
 
     return 0;
 }
