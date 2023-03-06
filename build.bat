@@ -15,8 +15,8 @@ echo %cd%
 git config --global --add safe.directory %cd:\=/%
 git checkout %1%
 git branch -a | findstr "*" > .branch
-@REM rmdir /s/q .git
-@REM del .gitignore
+rmdir /s/q .git
+del .gitignore
 cd ..
 
 
