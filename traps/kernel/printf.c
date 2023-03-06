@@ -135,6 +135,8 @@ printfinit(void)
 }
 
 void backtrace() {
-    uint64 * p = (uint64 *)r_fp();
-    printf("%p\n", p);
+    uint64 fp = r_fp();
+    uint64* frame = (uint64*)fp;
+    printf("backtrace:\n");
+    printf("%p\n", *frame);
 }
