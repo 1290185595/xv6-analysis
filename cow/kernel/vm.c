@@ -366,7 +366,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
 
     while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
-        printf("va0=%p, pte=%p\n", va0, walk(pagetable, va0, 0));
+        printf("va0=%p, pte=%p\n", va0, PTE_FLAGS((uint)walk(pagetable, va0, 0)));
         if (handle_with_cow(pagetable, va0))
             return -1;
         pa0 = walkaddr(pagetable, va0);
