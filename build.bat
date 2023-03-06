@@ -1,7 +1,7 @@
 @echo off
 
 set URL=git://g.csail.mit.edu
-set PROJECT=xv6-labs-2021
+set PROJECT=xv6-labs-2022
 
 echo clone from %PROJECT%:
 git clone %URL%/%PROJECT%
