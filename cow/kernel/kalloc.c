@@ -67,6 +67,26 @@ kinit() {
 }
 
 
+// Allocate one 4096-byte page of physical memory.
+// Returns a pointer that the kernel can use.
+// Returns 0 if the memory cannot be allocated.
+void *
+kalloc(void) {
+    struct run *r;
+
+    acquire(&kmem.lock);
+    r = kmem.freelist;
+    if (r)
+        kmem.freelist = r->next;
+    release(&kmem.lock);
+
+    if (r) {
+        memset((char *) r, 5, PGSIZE); // fill with junk
+        kref_add(r);
+    }
+    return (void *) r;
+}
+
 // Free the page of physical memory pointed at by pa,
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
@@ -90,22 +110,4 @@ kfree(void *pa) {
     r->next = kmem.freelist;
     kmem.freelist = r;
     release(&kmem.lock);
-}
-
-// Allocate one 4096-byte page of physical memory.
-// Returns a pointer that the kernel can use.
-// Returns 0 if the memory cannot be allocated.
-void *
-kalloc(void) {
-    struct run *r;
-
-    acquire(&kmem.lock);
-    r = kmem.freelist;
-    if (r)
-        kmem.freelist = r->next;
-    release(&kmem.lock);
-
-    if (r)
-        memset((char *) r, 5, PGSIZE); // fill with junk
-    return (void *) r;
 }
