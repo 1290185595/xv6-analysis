@@ -132,9 +132,11 @@ printfinit(void) {
 void
 backtrace() {
     printf("backtrace:\n");
-    uint64* fp = (uint64*)r_fp();
-    while((uint64)fp!=PGROUNDDOWN((uint64)fp)){
-        printf("%p\n", fp);
-        fp = (uint64*)(*(fp-2));
-    }
+    uint64 fp = r_fp();
+    printf("%p\n", fp);
+    printf("%p\n", *(uint64*)fp);
+//    while((uint64)fp!=PGROUNDDOWN((uint64)fp)){
+//        printf("%p\n", fp);
+//        fp = (uint64*)(*(fp-2));
+//    }
 }
