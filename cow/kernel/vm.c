@@ -470,7 +470,7 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
     memmove(mem, (void *) pa, PGSIZE);
 
     uint flags = PTE_FLAGS((*pte & ~PTE_C) | PTE_W);
-    uvmunmap(pagetable, PGROUNDUP(va), 1, 1);
+    uvmunmap(pagetable, PGROUNDDOWN(va), 1, 1);
     if (mappages(pagetable, va, PGSIZE, (uint64) mem, flags)) {
         kfree(mem);
         return -1;
