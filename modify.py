@@ -111,7 +111,7 @@ class LabTraps(LabNone):
     @classmethod
     def commit(cls):
         super().commit()
-        # Makefile.add_UPROGS("alarmtest")
+        Makefile.add_UPROGS("alarmtest")
 
 
 @LabManager.add_lab("cow")
