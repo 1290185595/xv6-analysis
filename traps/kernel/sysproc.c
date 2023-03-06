@@ -104,7 +104,6 @@ uint64 sys_sigalarm(void) {
 uint64 sys_sigreturn(void) {
     struct proc * p = myproc();
     memmove(p->trapframe, p->tick_trapframe, sizeof(struct trapframe));
-    p->tick_trapframe = (struct trapframe *) kalloc();
     kfree(p->tick_trapframe);
     p->tick_trapframe=0;
     return p->trapframe->a0;

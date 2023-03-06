@@ -153,9 +153,6 @@ freeproc(struct proc *p) {
     if (p->trapframe)
         kfree((void *) p->trapframe);
     p->trapframe = 0;
-    if (p->tick_trapframe)
-        kfree((void *) p->tick_trapframe);
-    p->tick_trapframe = 0;
     if (p->pagetable)
         proc_freepagetable(p->pagetable, p->sz);
     p->pagetable = 0;
@@ -167,7 +164,6 @@ freeproc(struct proc *p) {
     p->killed = 0;
     p->xstate = 0;
     p->state = UNUSED;
-    p->ticks = 0;
 
 }
 
