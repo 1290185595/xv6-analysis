@@ -19,6 +19,7 @@ struct run {
 
 struct {
     struct spinlock lock;
+    struct spinlock ref_lock;
     struct run *freelist;
     char *ref;
 } kmem;
@@ -36,9 +37,9 @@ freerange(void *pa_start, void *pa_end) {
 }
 
 inline int kref_change(void *pa, int i) {
-    acquire(&kmem.lock);
+    acquire(&kmem.ref_lock);
     i = kmem.ref[p2i(pa)] += i;
-    release(&kmem.lock);
+    release(&kmem.ref_lock);
     return i;
 }
 
@@ -58,11 +59,12 @@ void
 kinit() {
     int cnt = p2i((void *) PHYSTOP);
     initlock(&kmem.lock, "kmem");
+    initlock(&kmem.ref_lock, "kmem_ref");
 
     memset(end, 1, cnt);
-    acquire(&kmem.lock);
+    acquire(&kmem.ref_lock);
     kmem.ref = end;
-    release(&kmem.lock);
+    release(&kmem.ref_lock);
     freerange(end + cnt, (void *) PHYSTOP);
 }
 
@@ -76,13 +78,14 @@ kalloc(void) {
 
     acquire(&kmem.lock);
     r = kmem.freelist;
-    if (r)
+    if (r) {
         kmem.freelist = r->next;
+        kref_add(r);
+    }
     release(&kmem.lock);
 
     if (r) {
         memset((char *) r, 5, PGSIZE); // fill with junk
-        kref_add(r);
     }
     return (void *) r;
 }
@@ -98,16 +101,14 @@ kfree(void *pa) {
     if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP)
         panic("kfree");
 
-    if (kref_sub(pa)) return;
-
-
-    // Fill with junk to catch dangling refs.
-    memset(pa, 1, PGSIZE);
-
-    r = (struct run *) pa;
-
     acquire(&kmem.lock);
-    r->next = kmem.freelist;
-    kmem.freelist = r;
+    if (!kref_sub(pa)) {
+        memset(pa, 1, PGSIZE);
+
+        r = (struct run *) pa;
+
+        r->next = kmem.freelist;
+        kmem.freelist = r;
+    }
     release(&kmem.lock);
 }
