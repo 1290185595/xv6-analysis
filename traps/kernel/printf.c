@@ -133,7 +133,7 @@ void
 backtrace() {
     printf("backtrace:\n");
     uint64* fp = (uint64*)r_fp();
-    while(fp!=PGROUNDDOWN((uint64)fp)){
+    while((uint64)fp!=PGROUNDDOWN((uint64)fp)){
         printf("%p\n", fp);
         fp = (uint64*)(*(fp-2));
     }
