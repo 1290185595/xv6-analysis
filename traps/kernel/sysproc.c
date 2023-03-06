@@ -88,6 +88,7 @@ sys_uptime(void) {
 
 uint64 sys_sigalarm(void) {
     struct proc * p = myproc();
+    acquire(&p->lock);
     if (!p->tick_trapframe) {
         int ticks;
         uint64 handler;
@@ -98,13 +99,16 @@ uint64 sys_sigalarm(void) {
         p->ticks_cnt = 0;
         p->handler = handler;
     }
+    release(&p->lock);
     return 0;
 }
 
 uint64 sys_sigreturn(void) {
     struct proc * p = myproc();
+    acquire(&p->lock);
     memmove(p->trapframe, p->tick_trapframe, sizeof(struct trapframe));
     kfree(p->tick_trapframe);
     p->tick_trapframe=0;
+    release(&p->lock);
     return p->trapframe->a0;
 }
