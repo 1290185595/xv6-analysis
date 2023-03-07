@@ -116,7 +116,6 @@ main(int argc, char *argv[]) {
         table[i] = malloc(sizeof (struct entry));
         pthread_mutex_init(&(lock[i]), NULL);
     }
-    printf ("1212\n");
     //
     // first the puts
     //
