@@ -69,7 +69,7 @@ class LabNone:
         if file is None:
             for f in os.listdir(cls.lab_name):
                 cls.copy(f"{f}")
-        elif file in cls.exclude_files:
+        elif file in cls.exclude_paths:
             pass
         elif os.path.isdir(file):
             for f in os.listdir(f"{cls.lab_name}/{file}"):
