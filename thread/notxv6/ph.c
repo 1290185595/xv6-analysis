@@ -99,7 +99,6 @@ main(int argc, char *argv[]) {
     pthread_t *tha;
     void *value;
     double t1, t0;
-    printf ("1212\n");
 
 
     if (argc < 2) {
@@ -113,10 +112,10 @@ main(int argc, char *argv[]) {
     for (int i = 0; i < NKEYS; i++) {
         keys[i] = random();
     }
-    printf ("1212\n");
     for(int i=0;i<NBUCKET;i++) {
         pthread_mutex_init(&(table[i]->lock), NULL);
     }
+    printf ("1212\n");
     //
     // first the puts
     //
