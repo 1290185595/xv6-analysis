@@ -41,11 +41,11 @@ void put(int key, int value) {
 
     // is the key already present?
     struct entry *e = table[i];
-    pthread_mutex_lock(&(lock[i]));
     for ( ; e != 0; e = e->next) {
         if (e->key == key)
             break;
     }
+    pthread_mutex_lock(&(lock[i]));
     if (e) {
         // update the existing key.
         e->value = value;
