@@ -71,7 +71,7 @@ class LabNone:
                 cls.copy(f"{f}")
         elif file in cls.exclude_paths:
             pass
-        elif os.path.isdir(file):
+        elif os.path.isdir(f"{cls.lab_name}/{file}"):
             for f in os.listdir(f"{cls.lab_name}/{file}"):
                 cls.copy(f"{file}/{f}")
         else:
