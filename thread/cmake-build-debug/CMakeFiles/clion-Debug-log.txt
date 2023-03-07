@@ -1,0 +1,1 @@
+在 D:\Projects\XV6\xv6-analysis\thread 中找不到 CMakeLists.txt 选择 CMakeLists.txt
