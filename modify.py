@@ -75,8 +75,8 @@ class LabNone:
             for f in os.listdir(f"{cls.lab_name}/{file}"):
                 cls.copy(f"{file}/{f}")
         else:
-            shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
             print(f"copy: {cls.lab_name}/{file} => {project_name}/{file}")
+            shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
             change(f"{file}")
 
     @classmethod
