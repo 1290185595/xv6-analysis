@@ -113,6 +113,7 @@ main(int argc, char *argv[]) {
         keys[i] = random();
     }
     for(int i=0;i<NBUCKET;i++) {
+        table[i] = malloc(sizeof (struct entry));
         pthread_mutex_init(&(table[i]->lock), NULL);
     }
     printf ("1212\n");
