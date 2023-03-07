@@ -56,6 +56,7 @@ class LabManager:
 @LabManager.add_lab("none")
 class LabNone:
     lab_name = None
+    exclude_paths = ["CMakeLists.txt"]
 
     @classmethod
     def commit(cls):
@@ -66,9 +67,13 @@ class LabNone:
     @classmethod
     def copy(cls, file=None):
         if file is None:
-            for folder in os.listdir(cls.lab_name):
-                for file in os.listdir(f"{cls.lab_name}/{folder}"):
-                    cls.copy(f"{folder}/{file}")
+            for f in os.listdir(cls.lab_name):
+                cls.copy(f"{f}")
+        elif file in cls.exclude_files:
+            pass
+        elif os.path.isdir(file):
+            for f in os.listdir(f"{cls.lab_name}/{file}"):
+                cls.copy(f"{file}/{f}")
         else:
             shutil.copyfile(f"{cls.lab_name}/{file}", f"{project_name}/{file}")
             print(f"copy: {cls.lab_name}/{file} => {project_name}/{file}")

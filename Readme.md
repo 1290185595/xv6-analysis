@@ -7,12 +7,6 @@
 [实验视频](https://www.bilibili.com/video/BV1Qi4y1o7tN/)
 
 
-搭建环境：  
-'''
-./build.bat \[lab_name\]
-'''
-
-提交代码：  
-'''
-python modify.py
-'''
+`./build.bat [lab_name]`
+ 
+`python modify.py`
