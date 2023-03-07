@@ -84,6 +84,7 @@ thread_schedule(void) {
 
 void
 thread_create(void (*func)()) {
+    printf("creating\n");
     struct thread *t;
 
     for (t = all_thread; t < all_thread + MAX_THREAD; t++) {
