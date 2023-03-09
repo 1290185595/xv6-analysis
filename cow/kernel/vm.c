@@ -456,7 +456,7 @@ int handle_with_cow(pagetable_t pagetable, uint64 va) {
     pte_t *pte = walk(pagetable, va, 0);
     if (pte == 0) return -1;
     if ((*pte & PTE_V) == 0) return -1;
-//    if ((*pte & PTE_U) == 0) return -1;
+    if ((*pte & PTE_U) == 0) return -1;
     if ((*pte & PTE_W) != 0) return 0;
     if ((*pte & PTE_C) == 0) return -1;
 
