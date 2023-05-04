@@ -67,7 +67,6 @@ main(int argc, char *argv[])
     if(argc == 2){
         find(".", argv[1]);
     } else if(argc == 3){
-        printf("%s %s\n", argv[1], argv[2]);
         find(argv[1], argv[2]);
     }
     exit(0);
