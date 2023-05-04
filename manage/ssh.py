@@ -39,7 +39,7 @@ class Transport:
         print('sftp传输已建立')
 
     def __del__(self):
-        ssh_info = SshInfo()
+        self.sftp.close()
         print('sftp传输已关闭')
 
     def mkdir(self, dst):
@@ -84,8 +84,6 @@ class Transport:
         except:
             return []
 
-    def __del__(self):
-        self.sftp.close()
 
 
 def copy(src, dst):
